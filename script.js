@@ -1,18 +1,12 @@
 'use strict';
-const getCountry = (country, langAbb, currAbb) => {
-  const btn = document.querySelector('.btn-country');
-  const countriesContainer = document.querySelector('.countries');
 
-  ///////////////////////////////////////
-  const request = new XMLHttpRequest();
-  request.open('GET', `https://restcountries.com/v3.1/name/${country}`);
-  request.send();
+const btn = document.querySelector('.btn-country');
+const countriesContainer = document.querySelector('.countries');
 
-  request.addEventListener('load', function () {
-    const [data] = JSON.parse(this.responseText);
-    console.log(data);
+///////////////////////////////////////
 
-    const html = ` 
+const renderCountry = (data, langAbb, currAbb) => {
+  const html = ` 
   <article class="country">
   <img class="country__img" src="${data.flags.png}" />
   <div class="country__data">
@@ -26,9 +20,32 @@ const getCountry = (country, langAbb, currAbb) => {
   </div>
 </article>`;
 
-    countriesContainer.insertAdjacentHTML('beforeend', html);
-    countriesContainer.style.opacity = 1;
+  countriesContainer.insertAdjacentHTML('beforeend', html);
+  countriesContainer.style.opacity = 1;
+};
+const getCountryAndNeighbour = (country, langAbb, currAbb) => {
+  //AJAX call country 1
+  const request = new XMLHttpRequest();
+  request.open('GET', `https://restcountries.com/v3.1/name/${country}`);
+  request.send();
+
+  request.addEventListener('load', function () {
+    const [data] = JSON.parse(this.responseText);
+    console.log(data);
+    // Render country 1
+    renderCountry(data, langAbb, currAbb);
+    // Get neighbour country (2)
+
+    const [neighbour] = data.borders;
+    if (!neighbour) return;
+    const request2 = new XMLHttpRequest();
+    request2.open('GET', `https://restcountries.com/v3.1/alpha/${neighbour}`);
+    request2.send();
+    request2.addEventListener('load', function () {
+      const [data] = JSON.parse(this.responseText);
+      console.log(data);
+    });
   });
 };
-getCountry('portugal', 'por', 'EUR');
-getCountry('nigeria', 'eng', 'NGN');
+getCountryAndNeighbour('portugal', 'por', 'EUR');
+getCountryAndNeighbour('nigeria', 'eng', 'NGN');
